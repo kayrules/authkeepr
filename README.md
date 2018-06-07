@@ -21,3 +21,8 @@ $api->version('v1', [
 	//
 });
 ```
+
+## declare env variable to token provider url
+```
+AUTHKEEPER_SSO_URL=http://domain.com/auth/token
+```
