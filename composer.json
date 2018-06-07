@@ -1,0 +1,21 @@
+{
+    "name": "kayrules/authkeepr",
+    "description": "TM SSO auth-keeper middleware",
+    "type": "laravel-middleware",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "kayrules",
+            "email": "kayrules@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",    
+    "autoload": {
+        "psr-4": {
+            "Kayrules\\AuthKeepr\\": "src/"
+        }
+    }
+}
