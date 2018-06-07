@@ -1,5 +1,10 @@
 # Installation for lumen
 
+## install
+```
+composer require kayrules/authkeepr
+```
+
 ## define middleware in bootstrap/app.php
 ```
 $app->routeMiddleware([
