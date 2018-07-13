@@ -18,7 +18,7 @@ class AuthKeepr
     public function handle($request, Closure $next, $guard = null)
     {
         if(!env('AUTHKEEPR_SSO_URL')) {
-            return response('500 - Missing AUTHKEEPR_SSO_URL.', 401);
+            return $this->_missingEnvResponse();
         }
 
         $authHeader = $request->header('Authorization');
@@ -35,30 +35,40 @@ class AuthKeepr
 
         $c = $client->request('GET', env('AUTHKEEPR_SSO_URL'), $vars);
 		if($c->getStatusCode() != 200) {
-            return $this->_oauthExceptionResponse($authHeader);
+            return $this->_oauthExceptionResponse();
 		}
 		else {
             $response = (object) json_decode($c->getBody(), true);
             if($response->id > 0) $request->merge(['sso_id' => $response->id]);
             else {
-                return $this->_oauthExceptionResponse($authHeader);
+                return $this->_oauthExceptionResponse();
             }
 		}
 
         return $next($request);
     }
 
-    private function _oauthExceptionResponse($authHeader)
+    private function _oauthExceptionResponse()
     {
         $msg = [
             'error' => [
                 'code' => 401,
                 'type' => 'OAuthException',
-                'message' => 'An active access token must be used to query information about the current user.',
-                'url' => env('AUTHKEEPR_SSO_URL'),
-                'Authorization' => $authHeader
+                'message' => 'An active access token must be used to query information about the current user.'
             ]
         ];
         return response($msg, 401)->header('Content-Type', 'application/json');
+    }
+
+    private function _missingEnvResponse()
+    {
+        $msg = [
+            'error' => [
+                'code' => 500,
+                'type' => 'MissingEnvironment',
+                'message' => 'AUTHKEEPR_SSO_URL is missing from your environment.',
+            ]
+        ];
+        return response($msg, 500)->header('Content-Type', 'application/json');
     }
 }
