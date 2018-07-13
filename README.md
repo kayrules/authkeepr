@@ -22,7 +22,12 @@ $api->version('v1', [
 });
 ```
 
-## declare env variable to token provider url
+## declare .env variable to token provider url
 ```
-AUTHKEEPER_SSO_URL=http://domain.com/auth/token
+AUTHKEEPR_SSO_URL=http://domain.com/auth/token
+```
+
+## if the SSO provider apply strict header match, enter this in .env
+```
+AUTHKEEPR_SSO_ACCEPT_HEADER=application/vnd.strict.v1+json
 ```

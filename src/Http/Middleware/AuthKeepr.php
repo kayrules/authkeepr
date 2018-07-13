@@ -17,32 +17,48 @@ class AuthKeepr
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        if(!env('AUTHKEEPER_SSO_URL')) {
-            return response('500 - Missing AUTHKEEPER_SSO_URL.', 401);
+        if(!env('AUTHKEEPR_SSO_URL')) {
+            return response('500 - Missing AUTHKEEPR_SSO_URL.', 401);
         }
 
-        $header = $request->header('Authorization');
+        $authHeader = $request->header('Authorization');
         
         $client = new Client();
 		$vars = [
 			'http_errors' => false,
 			'headers' => [
                 'Content-Type' => 'application/json',
-                'Authorization' => $header
+                'Accept' => env('AUTHKEEPR_SSO_ACCEPT_HEADER'),
+                'Authorization' => $authHeader
 			],
 		];
 
-		$c = $client->request('GET', env('AUTHKEEPER_SSO_URL'), $vars);
-
+        $c = $client->request('GET', env('AUTHKEEPR_SSO_URL'), $vars);
 		if($c->getStatusCode() != 200) {
-            return response('401 - Unauthorized.', 401);
+            return $this->_oauthExceptionResponse($authHeader);
 		}
 		else {
             $response = (object) json_decode($c->getBody(), true);
             if($response->id > 0) $request->merge(['sso_id' => $response->id]);
-            else return response('401 - Unauthorized.', 401);
+            else {
+                return $this->_oauthExceptionResponse($authHeader);
+            }
 		}
 
         return $next($request);
+    }
+
+    private function _oauthExceptionResponse($authHeader)
+    {
+        $msg = [
+            'error' => [
+                'code' => 401,
+                'type' => 'OAuthException',
+                'message' => 'An active access token must be used to query information about the current user.',
+                'url' => env('AUTHKEEPR_SSO_URL'),
+                'Authorization' => $authHeader
+            ]
+        ];
+        return response($msg, 401)->header('Content-Type', 'application/json');
     }
 }
